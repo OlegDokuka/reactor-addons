@@ -101,17 +101,16 @@ public final class ReconnectMono<T> extends Mono<T> implements Invalidate, Dispo
 	@Override
 	@SuppressWarnings("uncheked")
 	public void subscribe(CoreSubscriber<? super T> actual) {
-		final ReconnectInner<T> toAdd = new ReconnectInner<>(actual, this);
-		actual.onSubscribe(toAdd);
+		final ReconnectInner<T> inner = new ReconnectInner<>(actual, this);
+		actual.onSubscribe(inner);
 
-		final int state = this.add(toAdd);
+		final int state = this.add(inner);
 
 		if (state == READY_STATE) {
-			actual.onNext(this.value);
-			actual.onComplete();
+			inner.complete(this.value);
 		}
 		else if (state == TERMINATED_STATE) {
-			actual.onError(this.t);
+			inner.onError(this.t);
 		}
 	}
 
